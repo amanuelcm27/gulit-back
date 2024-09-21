@@ -28,7 +28,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'Account',
+    'Store',
 ]
 
 MIDDLEWARE = [
@@ -42,9 +44,16 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
 ]
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+CSRF_COOKIE_HTTPONLY = False
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 ROOT_URLCONF = 'gulit.urls'
-CORS_ALLOW_ALL_ORIGINS=True
+AUTH_USER_MODEL = 'Account.User'
+CORS_ALLOWED_ORIGINS= ['http://localhost:5173']
+CORS_ALLOW_CREDENTIALS = True  # To allow cookies and credentials
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -106,12 +115,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
+MEDIA_URL='/media/'
+MEDIA_ROOT = BASE_DIR /'media'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
