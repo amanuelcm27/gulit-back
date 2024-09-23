@@ -46,7 +46,6 @@ MIDDLEWARE = [
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CSRF_COOKIE_HTTPONLY = False
-
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 ROOT_URLCONF = 'gulit.urls'

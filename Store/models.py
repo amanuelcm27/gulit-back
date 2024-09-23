@@ -42,7 +42,7 @@ class Product(models.Model):
                                  MinValueValidator(0), MaxValueValidator(5)])
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.TextField(max_length=850)
-    image = models.ImageField(upload_to='store_images')
+    image = models.ImageField(upload_to='product_images')
 
     def __str__(self):
         return self.name
