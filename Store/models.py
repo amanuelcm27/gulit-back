@@ -13,7 +13,8 @@ class Store(models.Model):
         verbose_name="store front page image ", upload_to="store_images")
     p_image_2 = models.ImageField(
         verbose_name="store bottom section image ", upload_to="store_images")
-
+    description = models.TextField(max_length=850)
+    
     def __str__(self):
         return self.name
 

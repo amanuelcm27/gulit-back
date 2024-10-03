@@ -7,8 +7,11 @@ from django.middleware.csrf import get_token
 from google.oauth2 import id_token
 # from google.auth.transport import requests
 from Account.models import User
+from .serializers import *
 from .serializers import UserRegisterSerializer
 import requests
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 
 @api_view(["POST"])
@@ -94,3 +97,10 @@ def register(request):
         return Response({"success": "User registered successfully"}, status=201)
 
     return Response(serializer.errors, status=400)
+
+
+class SetUserRoleView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
