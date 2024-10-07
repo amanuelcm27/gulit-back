@@ -1,6 +1,7 @@
 from django.db import models
 from Account.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+import os
 
 
 class Store(models.Model):
@@ -8,22 +9,47 @@ class Store(models.Model):
     name = models.CharField(max_length=50)
     logo = models.ImageField(
         verbose_name="logo of store", upload_to='store_images')
-    slogan = models.CharField(max_length=250)
     p_image_1 = models.ImageField(
-        verbose_name="store front page image ", upload_to="store_images")
+        verbose_name="store front page image", upload_to="store_images")
     p_image_2 = models.ImageField(
-        verbose_name="store bottom section image ", upload_to="store_images")
-    description = models.TextField(max_length=850)
-    
+        verbose_name="store bottom section image", upload_to="store_images")
+    slogan = models.CharField(max_length=250)
+    description = models.TextField(max_length=1500)
+    active = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
+
+    def delete_image_file(self, image_field):
+        """Helper method to delete an image file if it exists."""
+        if image_field and os.path.isfile(image_field.path):
+            os.remove(image_field.path)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old_instance = Store.objects.get(pk=self.pk)
+            # Delete old files if new ones are uploaded
+            if old_instance.logo != self.logo:
+                self.delete_image_file(old_instance.logo)
+            if old_instance.p_image_1 != self.p_image_1:
+                self.delete_image_file(old_instance.p_image_1)
+            if old_instance.p_image_2 != self.p_image_2:
+                self.delete_image_file(old_instance.p_image_2)
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.delete_image_file(self.logo)
+        self.delete_image_file(self.p_image_1)
+        self.delete_image_file(self.p_image_2)
+        super().delete(*args, **kwargs)
 
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
         ('electronics', 'Electronics'),
         ('clothing', 'Clothing'),
-        ('home_appliances', 'Home Appliances'),
+        ('home appliances', 'Home Appliances'),
         ('books', 'Books'),
         ('toys', 'Toys'),
         ('sports', 'Sports'),
@@ -40,10 +66,20 @@ class Product(models.Model):
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
     rating = models.DecimalField(max_digits=3, decimal_places=1, validators=[
-                                 MinValueValidator(0), MaxValueValidator(5)])
+                                 MinValueValidator(0), MaxValueValidator(5)], default=0)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.TextField(max_length=850)
     image = models.ImageField(upload_to='product_images')
 
     def __str__(self):
-        return self.name
+        return f'{self.name} from {self.store.name}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Checking if the store has more than 3 products
+        product_count = Product.objects.filter(store=self.store).count()
+
+        if product_count >= 3 and not self.store.active:
+            self.store.active = True
+            self.store.save()
