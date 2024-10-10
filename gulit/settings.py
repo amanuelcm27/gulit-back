@@ -31,7 +31,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'Account',
     'Store',
+    'Cart',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

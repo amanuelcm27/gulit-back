@@ -4,6 +4,7 @@ from ..models import *
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from django.db.models import Q
 
 
 class StoreCreationView (CreateAPIView):
@@ -46,37 +47,86 @@ class UpdateStoreView(UpdateAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Store.objects.filter(owner=self.request.user)
-    
-    
+
+
 class UserStoredProductsListView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-        store_user_owns = Store.objects.filter(owner=self.request.user).first() # specific store user owns
+        store_user_owns = Store.objects.filter(
+            owner=self.request.user).first()  # specific store user owns
         return Product.objects.filter(store=store_user_owns)
-    
+
+
 class AllStoresView(ListAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
 
     def get_queryset(self):
         return Store.objects.filter(active=True)
-    
+
 
 class GetStoreView(RetrieveAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     lookup_field = 'id'
-    
+
+
 class GetStoreProductsView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        store = Store.objects.get(id=self.kwargs['id'])
+        return Product.objects.filter(store=store)
+
+
+class SearchForStoreView(ListAPIView):
+    queryset = Store.objects.all()
+    serializer_class = StoreSerializer
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get('name')
+        print(search_query)
+        return Store.objects.filter(name__icontains=search_query, active=True)
+
+
+class SearchForProductInAStoreView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get('name')
+        store = Store.objects.get(id=self.kwargs['id'])
+        return Product.objects.filter( Q(name__icontains=search_query) | Q(category__icontains=search_query), store=store)
+
+class FilterProductsInStore(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
     def get_queryset(self):
+        price_param = self.request.query_params.get('price')
+        rating_param = self.request.query_params.get('rating')
         store = Store.objects.get(id=self.kwargs['id'])
-        return Product.objects.filter(store=store)
+        print(price_param , rating_param)
+        return Product.objects.filter(price__lte=price_param, rating__gte=rating_param, store=store)
+
+class MaxMinPriceInAStore(APIView):
+    
+    def get(self, request, *args, **kwargs):
+        store = Store.objects.get(id=kwargs.get('id'))
+        products = Product.objects.filter(store=store)
+        max_price = products.order_by('-price').first().price
+        min_price = products.order_by('price').first().price
+        return Response({"max_price": max_price, "min_price": min_price})
+    
+class GetProductView(RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'id'
+    
