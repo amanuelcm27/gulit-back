@@ -32,3 +32,7 @@ class CartItem(models.Model):
             self.sub_total = self.product.price * self.quantity
         super().save(*args, **kwargs)
         self.cart.update_total()  # Update the total in the cart
+        
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.cart.update_total() # Update the total in the cart

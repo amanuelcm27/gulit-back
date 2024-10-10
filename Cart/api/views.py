@@ -32,12 +32,17 @@ class CartListView(ListAPIView):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
-
+    
+    def get_queryset(self):
+            store = Store.objects.get(id=self.kwargs.get('store_id'))
+            cart = Cart.objects.get(owner=self.request.user, store=store)
+            return CartItem.objects.filter(cart=cart)
+    
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         store = Store.objects.get(id=self.kwargs.get('store_id'))
-        cart = Cart.objects.get(owner=self.request.user, store=store)
+        cart , created = Cart.objects.get_or_create(owner=self.request.user, store=store)
         total_price = cart.total_price
 
         return Response({
@@ -56,3 +61,10 @@ class CartItemDeletionView(DestroyAPIView):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        if instance.cart.owner != self.request.user:
+            return Response({"message": "You are not allowed to delete this item"}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            instance.delete()
+            return Response({"message": "Item deleted successfully"}, status=status.HTTP_200_OK)
