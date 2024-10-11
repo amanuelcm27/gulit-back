@@ -10,7 +10,7 @@ class Cart (models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
     def __str__(self):
-        return f"{self.owner.username}'s cart "
+        return f"{self.owner.username}'s cart in {self.store.name} "
     
     def update_total(self):
         self.total_price = sum([item.sub_total for item in self.items.all()])

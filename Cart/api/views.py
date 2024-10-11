@@ -35,7 +35,7 @@ class CartListView(ListAPIView):
     
     def get_queryset(self):
             store = Store.objects.get(id=self.kwargs.get('store_id'))
-            cart = Cart.objects.get(owner=self.request.user, store=store)
+            cart , created = Cart.objects.get_or_create(owner=self.request.user, store=store)
             return CartItem.objects.filter(cart=cart)
     
     def list(self, request, *args, **kwargs):

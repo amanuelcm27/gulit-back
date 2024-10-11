@@ -5,7 +5,7 @@ from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.db.models import Q
-
+from django.shortcuts import get_object_or_404
 
 class StoreCreationView (CreateAPIView):
     queryset = Store.objects.all()
@@ -128,5 +128,9 @@ class MaxMinPriceInAStore(APIView):
 class GetProductView(RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_field = 'id'
+    
+    def get_object(self):
+        store = get_object_or_404(Store, id=self.kwargs['store_id'])
+        product = get_object_or_404(Product, id=self.kwargs['product_id'], store=store)
+        return product
     
