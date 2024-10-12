@@ -2,20 +2,28 @@ from django.db import models
 from Account.models import User
 from Store.models import Store, Product
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-
+from django.apps import apps
 class Cart (models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    
+    checked_out = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.owner.username}'s cart in {self.store.name} "
     
     def update_total(self):
         self.total_price = sum([item.sub_total for item in self.items.all()])
         self.save()
-        
+    
+    def checkout(self):
+        if not self.checked_out:
+            Order = apps.get_model('Order', 'Order')
+            order = Order.objects.create(cart=self, creator=self.owner, total_price=self.total_price)
+            self.checked_out = True 
+            self.save()
+            return order
+        else:
+            raise ValueError("Cart has already been checked out.")
     
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)

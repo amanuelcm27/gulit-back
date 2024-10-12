@@ -32,17 +32,19 @@ class CartListView(ListAPIView):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
-            store = Store.objects.get(id=self.kwargs.get('store_id'))
-            cart , created = Cart.objects.get_or_create(owner=self.request.user, store=store)
-            return CartItem.objects.filter(cart=cart)
-    
+        store = Store.objects.get(id=self.kwargs.get('store_id'))
+        cart, created = Cart.objects.get_or_create(
+            owner=self.request.user, store=store)
+        return CartItem.objects.filter(cart=cart)
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         store = Store.objects.get(id=self.kwargs.get('store_id'))
-        cart , created = Cart.objects.get_or_create(owner=self.request.user, store=store)
+        cart, created = Cart.objects.get_or_create(
+            owner=self.request.user, store=store)
         total_price = cart.total_price
 
         return Response({
