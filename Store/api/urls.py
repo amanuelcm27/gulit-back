@@ -20,5 +20,8 @@ urlpatterns = [
          MaxMinPriceInAStore.as_view(), name="minmax_price"),
     path('products/filter/<int:id>/',
          FilterProductsInStore.as_view(), name='filter_products'),
-    path('product/<int:store_id>/<int:product_id>/', GetProductView.as_view(), name='product'),
+    path('product/<int:store_id>/<int:product_id>/',
+         GetProductView.as_view(), name='product'),
+    path('update_product/<int:pk>/',
+         ProductUpdateView.as_view(), name='update_product')
 ]

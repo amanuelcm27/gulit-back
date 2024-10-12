@@ -134,3 +134,9 @@ class GetProductView(RetrieveAPIView):
         product = get_object_or_404(Product, id=self.kwargs['product_id'], store=store)
         return product
     
+class ProductUpdateView(UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+    
+    

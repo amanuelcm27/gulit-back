@@ -1,8 +1,8 @@
 from django.db import models
 from Account.models import User
+from django.apps import apps
 from django.core.validators import MinValueValidator, MaxValueValidator
 import os
-
 
 class Store(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -83,3 +83,12 @@ class Product(models.Model):
         if product_count >= 3 and not self.store.active:
             self.store.active = True
             self.store.save()
+            
+        CartItem = apps.get_model('Cart', 'CartItem') # update cart item if product is updated
+        try:
+            cart_item = CartItem.objects.get(product=self)
+            cart_item.update_subtotal()
+        except CartItem.DoesNotExist:
+            pass 
+        
+    

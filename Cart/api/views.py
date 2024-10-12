@@ -64,7 +64,7 @@ class CartItemDeletionView(DestroyAPIView):
 
     def perform_destroy(self, instance):
         if instance.cart.owner != self.request.user:
-            return Response({"message": "You are not allowed to delete this item"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": " You are not allowed to delete this item "}, status=status.HTTP_403_FORBIDDEN)
         else:
             instance.delete()
-            return Response({"message": "Item deleted successfully"}, status=status.HTTP_200_OK)
+            return Response({"message": " Item deleted successfully "}, status=status.HTTP_200_OK)
