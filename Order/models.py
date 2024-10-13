@@ -1,6 +1,7 @@
 from django.db import models
 from Cart.models import Cart
 from Account.models import User
+from Store.models import Store
 import uuid
 
 class Order(models.Model):
@@ -14,6 +15,7 @@ class Order(models.Model):
     
     order_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # Automatically generated UUID
     cart = models.ForeignKey(Cart, on_delete=models.PROTECT)
+    store = models.ForeignKey(Store , on_delete=models.PROTECT)
     creator = models.ForeignKey(User, on_delete=models.PROTECT)
     status = models.CharField(max_length=10, choices=status_choices, default='pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Store the order total at the time of checkout
@@ -26,3 +28,4 @@ class Order(models.Model):
         if not self.total_price:
             self.total_price = self.cart.total_price
         super().save(*args, **kwargs)
+        self.cart.checkout()  # Mark the cart as checked out
