@@ -14,7 +14,7 @@ class Order(models.Model):
     )
     
     order_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # Automatically generated UUID
-    cart = models.ForeignKey(Cart, on_delete=models.PROTECT)
+    cart = models.ForeignKey(Cart, related_name='order_by_cart' , on_delete=models.PROTECT)
     store = models.ForeignKey(Store , on_delete=models.PROTECT)
     creator = models.ForeignKey(User, on_delete=models.PROTECT)
     status = models.CharField(max_length=10, choices=status_choices, default='pending')

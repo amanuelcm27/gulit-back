@@ -86,7 +86,7 @@ class Product(models.Model):
             self.store.save()
             
         CartItem = apps.get_model('Cart', 'CartItem') 
-        cart_items = CartItem.objects.filter(product=self)  # Get all CartItems for this product
+        cart_items = CartItem.objects.filter(product=self , cart__checked_out=False)  # Get all CartItems for this product
 
         for cart_item in cart_items:
             cart_item.update_subtotal()

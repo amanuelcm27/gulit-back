@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from ..models import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .serializers import OrderSerlializer
+from .serializers import *
+from django.db.models import Count
+
 
 class OrderCreationView(APIView):
     queryset = Order.objects.all()
@@ -18,5 +20,24 @@ class OrderCreationView(APIView):
             order = Order.objects.create(cart=cart, creator=request.user, store=store)
             return Response({'message': 'Order created successfully'}, status=201)
         except:
-            
             return Response({"message": "Invalid data"}, status=400)
+        
+class OrderListForUserView(ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerlializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(creator=self.request.user)
+    
+    
+class OrderListForStoreView(ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerlializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        store = Store.objects.get(owner= self.request.user)
+        return Order.objects.filter(creator=self.request.user, store=store)
+
+

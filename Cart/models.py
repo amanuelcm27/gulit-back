@@ -26,6 +26,8 @@ class Cart (models.Model):
         #only one non-checked-out cart can exist for a user and store
         if not self.checked_out and Cart.objects.filter(owner=self.owner, store=self.store, checked_out=False).exists():
             raise ValidationError("A non-checked-out cart already exists for this store. (only one non-checked-out cart can exist for a user and store)")
+        
+        
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE , null=True )

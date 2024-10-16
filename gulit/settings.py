@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'Store',
     'Cart',
     'Order',
+    'Coupon',
 ]
 
 
