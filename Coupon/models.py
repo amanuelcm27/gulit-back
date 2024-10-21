@@ -26,7 +26,6 @@ class Coupon (models.Model):
     def set_expiration(self, days):
         self.expiration_date = timezone.now().date() + timedelta(days=days)
         self.save()
-
     def check_expiry(self):
         if timezone.now().date() > self.expiration_date:  # Expiration logic
             if not self.expired:
@@ -34,4 +33,10 @@ class Coupon (models.Model):
                 self.save()
             return True
         return False
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.check_expiry()
+    
+  
 

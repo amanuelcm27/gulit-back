@@ -30,3 +30,11 @@ class CouponsListView(ListAPIView):
     def get_queryset(self):
         store = Store.objects.get(owner=self.request.user)
         return Coupon.objects.filter(store=store)
+    
+    
+class CouponDeletionView(DestroyAPIView):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = [IsAuthenticated]
+
+    
