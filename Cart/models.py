@@ -32,7 +32,7 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE , null=True )
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)] , default= 1)
-    sub_total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)] , default=0.00)  
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)] , default=0.00)  
     
     def __str__(self):
         return f"{self.quantity} x {self.product.name} in {self.cart.owner.username}'s cart"
