@@ -74,6 +74,14 @@ class CartItemUpdateView(UpdateAPIView):
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        if instance.cart.owner != self.request.user:
+            return Response({"message": " You are not allowed to update this item "}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class CartItemDeletionView(DestroyAPIView):
     queryset = CartItem.objects.all()

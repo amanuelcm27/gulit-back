@@ -25,7 +25,7 @@ class Order(models.Model):
         return f"Order {self.order_id} by {self.creator.username}"
 
     def save(self, *args, **kwargs):
-        if not self.total_price:
+        if self.total_price == 0.00: # if the total price is not set , set it to the cart's total price
             self.total_price = self.cart.total_price
         super().save(*args, **kwargs)
         self.cart.checkout()  # Mark the cart as checked out

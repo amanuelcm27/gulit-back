@@ -8,6 +8,9 @@ class Cart (models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     checked_out = models.BooleanField(default=False)
+    discounted_price = models.DecimalField(max_digits=10 , decimal_places=2, default=0.00)
+    
+    
     def __str__(self):
         return f"{self.owner.username}'s cart in {self.store.name} checked out : {self.checked_out} "
     

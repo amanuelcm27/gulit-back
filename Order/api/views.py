@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from .serializers import *
 from django.db.models import Count
-
+from decimal import Decimal
+from Coupon.models import Coupon
 
 class OrderCreationView(APIView):
     queryset = Order.objects.all()
@@ -17,10 +18,23 @@ class OrderCreationView(APIView):
             cart = Cart.objects.get(id=request.data.get('cart_id'),  owner=self.request.user, checked_out=False)
             store = Store.objects.get(id=request.data.get('store_id'))
             # for future payment gateway integration goes here
-            order = Order.objects.create(cart=cart, creator=request.user, store=store)
+            coupon_used = request.data.get('coupon_used')
+            print(coupon_used)
+            try:
+                coupon = Coupon.objects.get(code=coupon_used)
+            except Coupon.DoesNotExist:
+                return Response({"message": "Coupon not found"}, status=400)
+            
+            order = Order.objects.create(
+                cart=cart,
+                creator=request.user,
+                store=store,
+                total_price=cart.discounted_price  or cart.total_price  # Use the discounted total here
+            )
+            coupon.coupon_users.add(request.user)  #  add the user to the coupon users list
             return Response({'message': 'Order created successfully'}, status=201)
         except:
-            return Response({"message": "Invalid data"}, status=400)
+            return Response({"message": "Error in order creation"}, status=400)
         
 class OrderListForUserView(ListAPIView):
     queryset = Order.objects.all()

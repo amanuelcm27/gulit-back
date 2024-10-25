@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
 from decimal import Decimal
+from rest_framework.exceptions import PermissionDenied
+from Cart.api.serializers import CartItemSerializer
 class CouponCreationView(CreateAPIView):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
@@ -17,7 +19,6 @@ class CouponCreationView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         coupon = serializer.save(store=store) 
-        print(days , type(days))
         if days:
             coupon.set_expiration(int(days))
 
@@ -31,7 +32,6 @@ class CouponsListView(ListAPIView):
     def get_queryset(self):
         store = Store.objects.get(owner=self.request.user)
         Coupon.objects.update_expired_coupons()
-        print(Coupon)
         return Coupon.objects.filter(store=store)
     
     
@@ -40,16 +40,24 @@ class CouponDeletionView(DestroyAPIView):
     serializer_class = CouponSerializer
     permission_classes = [IsAuthenticated]
 
+    def perform_destroy(self, instance):
+        if instance.store.owner != self.request.user:
+            raise PermissionDenied('You are not allowed to delete this coupon')  
 
+        instance.delete()
+         
 class ApplyCouponView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs): 
         code = request.data.get('coupon_code')
-        cart = request.data.get('cart')
+        cart_id = request.data.get('cart_id')
         user = self.request.user
         store = Store.objects.get(id=request.data.get('store_id'))
-
+        try:
+            cart = Cart.objects.get(id=cart_id, owner=user, checked_out=False)
+        except Cart.DoesNotExist:
+            return Response({'message': 'Cart not found'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             coupon = Coupon.objects.get(code=code, store=store)
         except Coupon.DoesNotExist:
@@ -64,42 +72,40 @@ class ApplyCouponView(APIView):
             return Response({'message': 'Coupon already used'}, status=status.HTTP_400_BAD_REQUEST)
 
         # At this point, the coupon is valid
-        original_total_price = cart['total_price']
-        updated_cart = cart['items']  # Original cart items
-        new_total_price = original_total_price
+        original_total_price = cart.total_price
+        new_total_price = Decimal(original_total_price)
         discount_applied = False
+        original_cart_items = [CartItemSerializer(item ,context={'request': request}).data for item in cart.items.all()]
+        updated_cart_items = original_cart_items.copy()
         
         # Apply coupon to specific product (if defined)
         if coupon.product:
-            for item in updated_cart:
+            for item in updated_cart_items:
                 product = item['product']
                 sub_total = Decimal(item['sub_total'])
-
                 if product.get('id') == coupon.product.id:
                     discount = coupon.discount
                     new_sub_total = sub_total - (sub_total * (discount / 100))
-                    item['sub_total'] = f"{new_sub_total:.2f}"  # Update sub_total after discount
+                    item['sub_total']= new_sub_total  # Update sub_total after discount
                     discount_applied = True
                     new_total_price = Decimal(new_total_price - sub_total + new_sub_total)
-
+ 
         # Apply coupon to the whole cart (if no specific product is defined)
         else:
             discount = coupon.discount
             new_total_price = original_total_price - (original_total_price * (discount / 100))
             discount_applied = True
 
-
         if not discount_applied:
             return Response({'message': 'Coupon not applicable to any products in the cart'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Coupon has been successfully applied, save the user
-        coupon.coupon_users.add(user)
-
+        cart.discounted_price = new_total_price
+        cart.save()
         # Return the updated cart
         updated_cart = {
-            'total_price': f"{new_total_price:.2f}",  
-            'id': cart['id'], 
-            'items': updated_cart  
+            'total_price': new_total_price,  
+            'id': cart.id, 
+            'items': updated_cart_items  
         }
 
         return Response(updated_cart, status=status.HTTP_200_OK)

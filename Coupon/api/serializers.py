@@ -8,6 +8,7 @@ class CouponSerializer(serializers.ModelSerializer):
     store = StoreSerializer(read_only=True , required=False)
     product_id = serializers.PrimaryKeyRelatedField(source='product', queryset=Product.objects.all() , required=False, allow_null=True)
     product = ProductSerializer(read_only=True)
+    
     class Meta:
         model = Coupon
         fields = ('id', 'code', 'coupon_users', 'discount', 'product', 'product_id',
