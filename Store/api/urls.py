@@ -13,6 +13,7 @@ urlpatterns = [
     path('store/<int:id>/', GetStoreView.as_view(), name='store'),
     path('store/<int:id>/products/',
          GetStoreProductsView.as_view(), name='store_products'),
+    path('store/<int:id>/featured_products/',FeaturedProductsView.as_view(), name='featured_products'),
     path('stores/search/', SearchForStoreView.as_view(), name='search_store'),
     path('products/search/<int:id>/',
          SearchForProductInAStoreView.as_view(), name='search_product'),

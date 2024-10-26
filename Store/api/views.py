@@ -77,6 +77,18 @@ class GetStoreView(RetrieveAPIView):
     lookup_field = 'id'
 
 
+class FeaturedProductsView(ListAPIView):    
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        try:
+            store = Store.objects.get(id=self.kwargs['id'])
+        except Store.DoesNotExist:
+            return Response({"message": "Store not found"}, status=400)
+       # fetch only 3 large price products from all products
+        return Product.objects.filter(store=store).order_by('-price')[:3]
+
 class GetStoreProductsView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
