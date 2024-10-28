@@ -101,7 +101,7 @@ class ApplyCouponView(APIView):
 
         cart.discounted_price = new_total_price
         cart.save()
-        # Return the updated cart
+        
         updated_cart = {
             'total_price': new_total_price,  
             'id': cart.id, 

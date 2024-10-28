@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 
 class StoreCreationView (CreateAPIView):
     queryset = Store.objects.all()
@@ -89,10 +90,16 @@ class FeaturedProductsView(ListAPIView):
        # fetch only 3 large price products from all products
         return Product.objects.filter(store=store).order_by('-price')[:3]
 
+
+class StoreProductPagination(PageNumberPagination):
+    page_size = 6 
+    page_size_query_param = 'page_size'  
+    max_page_size = 100  
+
 class GetStoreProductsView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    pagination_class = StoreProductPagination
     def get_queryset(self):
         store = Store.objects.get(id=self.kwargs['id'])
         return Product.objects.filter(store=store)
@@ -111,7 +118,7 @@ class SearchForStoreView(ListAPIView):
 class SearchForProductInAStoreView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    pagination_class = StoreProductPagination
     def get_queryset(self):
         search_query = self.request.query_params.get('name')
         store = Store.objects.get(id=self.kwargs['id'])
@@ -120,7 +127,7 @@ class SearchForProductInAStoreView(ListAPIView):
 class FilterProductsInStore(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    
+    pagination_class = StoreProductPagination
     def get_queryset(self):
         price_param = self.request.query_params.get('price')
         rating_param = self.request.query_params.get('rating')
