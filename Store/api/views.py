@@ -111,7 +111,6 @@ class SearchForStoreView(ListAPIView):
 
     def get_queryset(self):
         search_query = self.request.query_params.get('name')
-        print(search_query)
         return Store.objects.filter(name__icontains=search_query, active=True)
 
 

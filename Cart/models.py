@@ -22,8 +22,7 @@ class Cart (models.Model):
         if not self.checked_out:
             self.checked_out = True 
             self.save()
-        else:
-            raise ValueError("Cart has already been checked out.")
+     
         
     def clean(self):
         #only one non-checked-out cart can exist for a user and store
