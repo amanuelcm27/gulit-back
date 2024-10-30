@@ -90,4 +90,23 @@ class Product(models.Model):
 
         for cart_item in cart_items:
             cart_item.update_subtotal()
+            
+    def average_rating(self):
+        ratings = self.ratings.all() 
+        if ratings.exists():
+            average_rating = sum(rating.rating for rating in ratings) / ratings.count()
+            self.rating = round(average_rating, 1) 
+            self.save()
+       
+            
+     
+class Rating (models.Model):
     
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='ratings', on_delete=models.CASCADE)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    comment = models.TextField(max_length=500, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.creator}'s rating for {self.product}"

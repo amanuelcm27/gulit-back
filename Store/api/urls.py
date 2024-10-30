@@ -24,5 +24,7 @@ urlpatterns = [
     path('product/<int:store_id>/<int:product_id>/',
          GetProductView.as_view(), name='product'),
     path('update_product/<int:pk>/',
-         ProductUpdateView.as_view(), name='update_product')
+         ProductUpdateView.as_view(), name='update_product'),
+    path ('rate_product/' , RateProductView.as_view(), name="rate_product"),
+    path ('reviews/<int:store_id>/<int:product_id>/' ,ProductReviewsView.as_view(), name="reviews")
 ]

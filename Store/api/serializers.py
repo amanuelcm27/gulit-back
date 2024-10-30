@@ -19,3 +19,11 @@ class ProductSerializer (serializers.ModelSerializer):
         model = Product
         fields = ('id', 'store', 'name', 'price', 'discount',
                   'quantity', 'rating', 'category', 'description', 'image')
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    creator = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Rating
+        fields = ('creator', 'rating' , 'comment' , 'created_at')

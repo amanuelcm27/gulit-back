@@ -77,7 +77,7 @@ class GetStoreView(RetrieveAPIView):
     serializer_class = StoreSerializer
     lookup_field = 'id'
 
-
+    
 class FeaturedProductsView(ListAPIView):    
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -157,4 +157,49 @@ class ProductUpdateView(UpdateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     
+    
+    
+class RateProductView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        rating_value = request.data.get('rating')
+        product_id = request.data.get('product_id')
+        store_id = request.data.get("store_id")
+        comment = request.data.get('comment')
+        
+        try:
+            product = Product.objects.get(id=product_id, store=store_id)
+        except Product.DoesNotExist:
+            return Response("No Product Found", status=400)        
+        rating, created = Rating.objects.update_or_create(
+            creator=user,
+            product=product,
+            defaults={
+                'rating': rating_value,
+                'comment': comment
+            }
+        )
+        product.average_rating()
+        
+        if created:
+            message = "Rated Product Successfully"
+        else:
+            message = "Updated Product Rating Successfully"
+
+        return Response(message, status=200)
+           
+        
+class ProductReviewsView(ListAPIView):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+    def get_queryset(self):
+        store = Store.objects.get(id=self.kwargs['store_id'])
+        product = Product.objects.get(id=self.kwargs['product_id'] , store=store)
+        return Rating.objects.filter(product=product).exclude(comment__isnull=True).exclude(comment__exact='').order_by('-created_at')
+        
+        
+    
+        
     
