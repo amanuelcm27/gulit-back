@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-
+from rest_framework.exceptions import NotFound
 class StoreCreationView (CreateAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
@@ -157,7 +157,14 @@ class ProductUpdateView(UpdateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     
-    
+    def get_queryset(self):
+        store = Store.objects.get(owner=self.request.user)
+        product_id = self.kwargs['pk']
+        try:
+            product = Product.objects.get(store=store , id=product_id)
+        except Product.DoesNotExist:
+            raise NotFound("No Product Found")
+        return Product.objects.filter(store=store , id=product_id)
     
 class RateProductView(APIView):
     permission_classes = [IsAuthenticated]

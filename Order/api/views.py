@@ -75,3 +75,5 @@ class OrderFilterForStoreView(ListAPIView):
         filter_method = self.request.query_params.get('filter_method')
         store = Store.objects.get(owner=self.request.user)
         return Order.objects.filter(store=store , status=filter_method)
+    
+    

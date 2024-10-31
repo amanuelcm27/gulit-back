@@ -67,7 +67,7 @@ def login_with_google(request):
     params = {"access_token": access_token}
 
     try:
-        user_info_response = requests.get(google_user_info_url, params=params)
+        user_info_response = requests.get(google_user_info_url, params=params )
         user_info = user_info_response.json()
         if user_info_response.status_code != 200:
             return JsonResponse({"error": "Invalid access token"}, status=400)

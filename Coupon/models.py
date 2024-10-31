@@ -35,7 +35,6 @@ class Coupon (models.Model):
         self.save()
         
     def check_expiry(self):
-        print('check_expiry triggered')
         if timezone.now() > self.expiration_date:  # Expiration logic
             if not self.expired:
                 self.expired = True
