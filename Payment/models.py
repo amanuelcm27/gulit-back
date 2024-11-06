@@ -12,7 +12,7 @@ class PaymentMethod(models.Model):
     business_name = models.CharField(max_length=100)
     account_name = models.CharField(max_length=100)
     account_number = models.CharField(max_length=100)
-    sub_account_id = models.CharField(max_length=100)
+    sub_account_id = models.CharField(max_length=500)
 
     def __str__(self):
         return f"{self.owner.username}'s Payment Method"
@@ -31,6 +31,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     cart = models.ForeignKey(Cart, on_delete=models.PROTECT)
     store = models.ForeignKey(Store, on_delete=models.PROTECT)
+    coupon_used = models.CharField(max_length=50 , null=True , blank=True , default=None )
     tx_ref = models.CharField(max_length=100, unique=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")

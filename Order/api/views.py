@@ -43,7 +43,7 @@ class OrderListForUserView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(creator=self.request.user)
+        return Order.objects.filter(creator=self.request.user).order_by('-date_created')
     
     
 class OrderListForStoreView(ListAPIView):
