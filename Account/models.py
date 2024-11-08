@@ -14,3 +14,16 @@ class User(AbstractUser):
     
     def __str__(self):
         return f"{self.email}"
+    
+
+class CustomerProfile ( models.Model) :
+    user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} profile"

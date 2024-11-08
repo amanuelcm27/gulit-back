@@ -67,7 +67,7 @@ def login_with_google(request):
     params = {"access_token": access_token}
 
     try:
-        user_info_response = requests.get(google_user_info_url, params=params )
+        user_info_response = requests.get(google_user_info_url, params=params)
         user_info = user_info_response.json()
         if user_info_response.status_code != 200:
             return JsonResponse({"error": "Invalid access token"}, status=400)
@@ -104,3 +104,38 @@ class SetUserRoleView(generics.UpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
+
+class CreateCustomerProfileView(generics.CreateAPIView):
+    queryset = CustomerProfile.objects.all()
+    serializer_class = CustomerProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class UpdateCustomerProfileView(generics.UpdateAPIView):
+    queryset = CustomerProfile.objects.all()
+    serializer_class = CustomerProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return CustomerProfile.objects.get(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CustomerProfileView(generics.RetrieveAPIView):
+    queryset = CustomerProfile.objects.all()
+    serializer_class = CustomerProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            customer_profile = CustomerProfile.objects.get(user=request.user)
+            serializer = self.get_serializer(customer_profile)
+            return Response(serializer.data, status=200)
+        except CustomerProfile.DoesNotExist:
+            return Response({"profile_set": False}, status=200)
