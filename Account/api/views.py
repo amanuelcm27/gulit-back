@@ -43,12 +43,13 @@ def get_logged_in_user(request):
     if request.user.is_authenticated:
 
         user = request.user
+
         user_data = {
             'id': user.id,
             'username': user.username,
             'email': user.email,
             'role': user.role,
-            'authenticated': True
+            'authenticated': True,
         }
         return Response(user_data)
     else:
@@ -131,7 +132,6 @@ class CustomerProfileView(generics.RetrieveAPIView):
     serializer_class = CustomerProfileSerializer
     permission_classes = [IsAuthenticated]
 
-    
     def retrieve(self, request, *args, **kwargs):
         try:
             customer_profile = CustomerProfile.objects.get(user=request.user)

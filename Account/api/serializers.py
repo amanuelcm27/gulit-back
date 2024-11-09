@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import User , CustomerProfile
+from ..models import User, CustomerProfile
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -14,14 +14,20 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id','username' , 'email' , 'role')
-        
-        
 class CustomerProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(required=False)
+    user = serializers.StringRelatedField()
+
     class Meta:
         model = CustomerProfile
-        fields = ('id' ,'user', 'first_name', 'last_name', 'email', 'city', 'state', 'address')
+        fields = ('id', 'user', 'first_name', 'last_name',
+                  'email', 'city', 'state', 'address')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = CustomerProfileSerializer(required=False)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'role', 'profile')
+
+    
