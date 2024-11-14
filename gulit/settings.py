@@ -52,11 +52,11 @@ MIDDLEWARE = [
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173' , 'https://gulitco.vercel.app']
 
 ROOT_URLCONF = 'gulit.urls'
 AUTH_USER_MODEL = 'Account.User'
-CORS_ALLOWED_ORIGINS= ['http://localhost:5173']
+CORS_ALLOWED_ORIGINS= ['http://localhost:5173' , 'https://gulitco.vercel.app']
 CORS_ALLOW_CREDENTIALS = True  # To allow cookies and credentials
 
 TEMPLATES = [

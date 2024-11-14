@@ -32,7 +32,7 @@ class CouponsListView(ListAPIView):
     def get_queryset(self):
         store = Store.objects.get(owner=self.request.user)
         Coupon.objects.update_expired_coupons()
-        return Coupon.objects.filter(store=store)
+        return Coupon.objects.filter(store=store).order_by('-date_created')
     
     
 class CouponDeletionView(DestroyAPIView):
